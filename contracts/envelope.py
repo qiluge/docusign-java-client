@@ -7,8 +7,8 @@ from ontology.interop.Ontology.Runtime import Base58ToAddress
 from ontology.interop.Ontology.Contract import Migrate
 from ontology.interop.Ontology.Native import Invoke
 
-CommitEvent = RegisterAction("Commit", "fromOntId", "contentHash", "signers")
-DeleteEvent = RegisterAction("Delete", "fromOntId", "contentHash")
+CommitEvent = RegisterAction("Commit", "ownerOntId", "contentHash", "envelopeId", "signers")
+DeleteEvent = RegisterAction("Delete", "ownerOntId", "contentHash", "envelopeId")
 
 OWNER = Base58ToAddress("ATqpnrgVjzmkeHEqPiErnsxTEgi5goor2e")
 ONTID_CONTRACT_ADDRESS = bytearray(b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x03')
@@ -18,7 +18,7 @@ ctx = GetContext()
 
 def Main(operation, args):
     if operation == 'commitEnvelope':
-        return commitEnvelope(args[0], args[1], args[2], args[3])
+        return commitEnvelope(args[0], args[1], args[2], args[3], args[4])
     if operation == 'deleteEnvelope':
         return deleteEnvelope(args[0], args[1], args[2])
     if operation == 'getEnvelope':
@@ -36,12 +36,12 @@ def Main(operation, args):
         return Upgrade(code, needStorage, name, version, author, email, description)
 
 
-def commitEnvelope(fromOntId, signerPubKeyIndex, contentHash, signers):
+def commitEnvelope(ownerOntId, signerPubKeyIndex, contentHash, envelopeId, signers):
     """
     : param signers: all signed ontId
     """
-    # verify fromOntId signature
-    param = state(fromOntId, signerPubKeyIndex)
+    # verify ownerOntId signature
+    param = state(ownerOntId, signerPubKeyIndex)
     res = Invoke(0, ONTID_CONTRACT_ADDRESS, "verifySignature", param)
     if res != b'\x01':
         raise Exception("commiterId verifySignature error.")
@@ -49,10 +49,10 @@ def commitEnvelope(fromOntId, signerPubKeyIndex, contentHash, signers):
     envelopeData = Get(ctx, contentHash)
     if len(envelopeData) != 0:
         raise Exception("envelope already existed")
-    envelope = [fromOntId, contentHash, signers]
+    envelope = [ownerOntId, contentHash, envelopeId, signers]
     envelopeData = Serialize(envelope)
     Put(ctx, contentHash, envelopeData)
-    CommitEvent(fromOntId, contentHash, signers)
+    CommitEvent(ownerOntId, contentHash, envelopeId, signers)
 
 
 def getEnvelop(contentHash):
@@ -63,9 +63,9 @@ def getEnvelop(contentHash):
     return ''
 
 
-def deleteEnvelope(fromOntId, signerPubKeyIndex, contentHash):
-    # verify fromOntId signature
-    param = state(fromOntId, signerPubKeyIndex)
+def deleteEnvelope(ownerOntId, signerPubKeyIndex, contentHash):
+    # verify ownerOntId signature
+    param = state(ownerOntId, signerPubKeyIndex)
     res = Invoke(0, ONTID_CONTRACT_ADDRESS, "verifySignature", param)
     if res != b'\x01':
         raise Exception("commiterId verifySignature error.")
@@ -73,12 +73,12 @@ def deleteEnvelope(fromOntId, signerPubKeyIndex, contentHash):
     envelopeData = Get(ctx, contentHash)
     if len(envelopeData) != 0:
         envelope = Deserialize(envelopeData)
-        if len(envelope) != 3:
+        if len(envelope) != 4:
             raise Exception('illegal envelope')
-        if fromOntId != envelope[0]:
+        if ownerOntId != envelope[0]:
             raise Exception('from ONT ID is wrong')
         Delete(ctx, contentHash)
-        DeleteEvent(fromOntId, contentHash)
+        DeleteEvent(ownerOntId, contentHash, envelope[2])
 
 
 def Upgrade(code, needStorage, name, version, author, email, description):

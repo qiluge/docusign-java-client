@@ -83,6 +83,12 @@ There are other use-case scenarios, such as **single page applications** (SPA) t
 
 Log issues against this client through GitHub. We also have an [active developer community on Stack Overflow](https://stackoverflow.com/questions/tagged/docusignapi).
 
+## Ontology
+
+Commit document hash to Ontology blockchain after signature completed.
+
+![img](process.png)
+
 ## License
 
 The DocuSign Java Client is licensed under the [MIT License](https://github.com/docusign/docusign-java-client/blob/master/LICENSE).
