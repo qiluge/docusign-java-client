@@ -10,7 +10,7 @@ public class OntologyApiTest {
         String ip = "http://polaris1.ont.io";
         String restUrl = ip + ":" + "20334";
         OntologyApi api = new OntologyApi(restUrl, contractAddr, 2500, 5000000);
-        OntologyApi.ContractEnvelope envelope = api.getEnvelope(contentHash);
+        OntologyApi.SignedFileInfo envelope = api.getSignedFileInfo(contentHash);
         System.out.println(envelope.ownerOntId);
     }
 }

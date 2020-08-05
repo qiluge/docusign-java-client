@@ -89,6 +89,16 @@ Commit document hash to Ontology blockchain after signature completed.
 
 ![img](process.png)
 
+### Ontology Contract and Docusign
+
+We will combine [Ontology](https://ont.io) and docusign to further increase the credibility of signed contract.
+We will record the hash of signed contract in Ontology chain because of the unforgeable feature of blockchain.
+
+We provide a [contract](contracts/envelope.py) to record file hash, envelope ID, all signers and contract initiator.
+
+The [api document](src/main/java/com/docusign/esign/ontology/api/READEME.md) made a description about how to interact
+with Ontology blockchain.
+
 ## License
 
 The DocuSign Java Client is licensed under the [MIT License](https://github.com/docusign/docusign-java-client/blob/master/LICENSE).

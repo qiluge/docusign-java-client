@@ -17,12 +17,12 @@ ctx = GetContext()
 
 
 def Main(operation, args):
-    if operation == 'commitEnvelope':
-        return commitEnvelope(args[0], args[1], args[2], args[3], args[4])
-    if operation == 'deleteEnvelope':
-        return deleteEnvelope(args[0], args[1], args[2])
-    if operation == 'getEnvelope':
-        return getEnvelop(args[0])
+    if operation == 'commitSignedFileInfo':
+        return commitSignedFileInfo(args[0], args[1], args[2], args[3], args[4])
+    if operation == 'deleteSignedFileInfo':
+        return deleteSignedFileInfo(args[0], args[1], args[2])
+    if operation == 'getSignedFileInfo':
+        return getSignedFileInfo(args[0])
     if operation == 'migrate':
         if len(args) != 7:
             return False
@@ -36,7 +36,7 @@ def Main(operation, args):
         return Upgrade(code, needStorage, name, version, author, email, description)
 
 
-def commitEnvelope(ownerOntId, signerPubKeyIndex, contentHash, envelopeId, signers):
+def commitSignedFileInfo(ownerOntId, signerPubKeyIndex, contentHash, envelopeId, signers):
     """
     : param signers: all signed ontId
     """
@@ -55,7 +55,7 @@ def commitEnvelope(ownerOntId, signerPubKeyIndex, contentHash, envelopeId, signe
     CommitEvent(ownerOntId, contentHash, envelopeId, signers)
 
 
-def getEnvelop(contentHash):
+def getSignedFileInfo(contentHash):
     # get envelope
     envelopeData = Get(ctx, contentHash)
     if len(envelopeData) != 0:
@@ -63,7 +63,7 @@ def getEnvelop(contentHash):
     return ''
 
 
-def deleteEnvelope(ownerOntId, signerPubKeyIndex, contentHash):
+def deleteSignedFileInfo(ownerOntId, signerPubKeyIndex, contentHash):
     # verify ownerOntId signature
     param = state(ownerOntId, signerPubKeyIndex)
     res = Invoke(0, ONTID_CONTRACT_ADDRESS, "verifySignature", param)

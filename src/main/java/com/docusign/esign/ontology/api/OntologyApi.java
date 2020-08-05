@@ -18,13 +18,13 @@ import com.github.ontio.smartcontract.neovm.abi.Parameter;
 
 public class OntologyApi extends EnvelopesApi {
 
-    public class ContractEnvelope {
+    public class SignedFileInfo {
         public String ownerOntId;
         public String contentHash;
         public String envelopeId;
         public String[] signers;
 
-        public ContractEnvelope(String ownerOntId, String contentHash, String envelopeId, String[] signers) {
+        public SignedFileInfo(String ownerOntId, String contentHash, String envelopeId, String[] signers) {
             this.ownerOntId = ownerOntId;
             this.contentHash = contentHash;
             this.envelopeId = envelopeId;
@@ -68,22 +68,22 @@ public class OntologyApi extends EnvelopesApi {
         ontSdk.setRestful(nodeRestURL);
     }
 
-    public String commitEnvelope(Account payer, Account ownerOntIdSigner, int signerPubKeyIndex,
-                                 String docusignAccountId, ContractEnvelope contractEnvelope) throws Exception {
-        Envelope envelope = this.getEnvelope(docusignAccountId, contractEnvelope.envelopeId);
+    public String commitSignedFileInfo(Account payer, Account ownerOntIdSigner, int signerPubKeyIndex,
+                                 String docusignAccountId, SignedFileInfo signedFileInfo) throws Exception {
+        Envelope envelope = this.getEnvelope(docusignAccountId, signedFileInfo.envelopeId);
         if (!"completed".equals(envelope.getStatus())) {
             throw new Exception("envelope is not completed!");
         }
-        String name = "commitEnvelope";
+        String name = "commitSignedFileInfo";
         Parameter ownerOntIdParam = new Parameter("ownerOntId", Parameter.Type.String,
-                contractEnvelope.ownerOntId);
+                signedFileInfo.ownerOntId);
         Parameter pubKeyIndexParam = new Parameter("signerPubKeyIndex", Parameter.Type.Integer,
                 signerPubKeyIndex);
         Parameter contentHashParam = new Parameter("contentHash", Parameter.Type.String,
-                contractEnvelope.contentHash);
+                signedFileInfo.contentHash);
         Parameter envelopeIdParam = new Parameter("envelopeIdParam", Parameter.Type.String,
-                contractEnvelope.envelopeId);
-        Parameter signersParam = new Parameter("signers", Parameter.Type.Array, contractEnvelope.signers);
+                signedFileInfo.envelopeId);
+        Parameter signersParam = new Parameter("signers", Parameter.Type.Array, signedFileInfo.signers);
         AbiFunction func = new AbiFunction(name, ownerOntIdParam, pubKeyIndexParam, contentHashParam, signersParam,
                 envelopeIdParam);
         byte[] params = BuildParams.serializeAbiFunction(func);
@@ -98,8 +98,8 @@ public class OntologyApi extends EnvelopesApi {
         return "";
     }
 
-    public ContractEnvelope getEnvelope(String contentHash) throws Exception {
-        String name = "getEnvelope";
+    public SignedFileInfo getSignedFileInfo(String contentHash) throws Exception {
+        String name = "getSignedFileInfo";
         Parameter contentHashParam = new Parameter("contentHash", Parameter.Type.String, contentHash);
         AbiFunction func = new AbiFunction(name, contentHashParam);
         Object obj = ontSdk.neovm().sendTransaction(Helper.reverse(contractAddr), null, null, 0,
@@ -120,12 +120,12 @@ public class OntologyApi extends EnvelopesApi {
             String signerOntId = (String) hexSigners.get(i);
             signers[i] = new String(Helper.hexToBytes(signerOntId));
         }
-        return new ContractEnvelope(owner, contentHash, envelopeId, signers);
+        return new SignedFileInfo(owner, contentHash, envelopeId, signers);
     }
 
-    public String deleteEnvelope(Account payer, Account ownerOntIdSigner, String ownerOntId, String signerPubKeyIndex,
+    public String deleteSignedFileInfo(Account payer, Account ownerOntIdSigner, String ownerOntId, String signerPubKeyIndex,
                                  String contentHash) throws Exception {
-        String name = "deleteEnvelope";
+        String name = "deleteSignedFileInfo";
         Parameter ownerOntIdParam = new Parameter("ownerOntId", Parameter.Type.String, ownerOntId);
         Parameter pubKeyIndexParam = new Parameter("signerPubKeyIndex", Parameter.Type.Integer,
                 signerPubKeyIndex);
